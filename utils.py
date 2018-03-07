@@ -80,21 +80,40 @@ def prepare_splits(X_train, y_train, X_test, y_test):
   X_test = X_test[mask]
   y_test = y_test[mask]
 
+  X_train, X_val, X_test, X_dev = preprocess_data(X_train, X_val,
+                                                  X_dev, X_test)
+
   return X_train, y_train, X_val, y_val, X_dev, y_dev, X_test, y_test
 
-def preprocess_data(X_train, y_train, X_val, y_val, X_dev, y_dev,
-                    X_test, y_test):
-  mean = np.mean(X_train, axis = 0, keepdims = True)
+def preprocess_data(X_train, X_val, X_dev, X_test):
+  mean_image = np.mean(X_train, axis = 0, keepdims = True)
   X_train -= mean_image
   X_val -= mean_image
   X_test -= mean_image
   X_dev -= mean_image
 
+  return X_train, X_val, X_test, X_dev
+
   # Whitenning
   # Standardization
 
-Xtr, Ytr, Xte, Yte = load_CIFAR10('data')
-data = prepare_splits(Xtr, Ytr, Xte, Yte)
-X_train, y_train, X_val, y_val, X_dev, y_dev, X_test, y_test = data
+def get_minibatch(X, y, bs):
+  sz = len(y)
+  indices = np.random.choice(sz, bs)
+  return X[indices], y[indices]
 
-print(X_train.shape, X_val.shape, X_dev.shape, X_test.shape)
+def get_minibatch_onehot(X, y, bs):
+  sz = len(y)
+  indices = np.random.choice(sz, bs)
+  X_batch = X[indices]
+  y_batch = y[indices]
+  y_one_hot = np.zeros((bs, 10))
+  y_one_hot[y_batch] = 1
+  return X_batch, y_one_hot
+
+
+# Xtr, Ytr, Xte, Yte = load_CIFAR10('data')
+# data = prepare_splits(Xtr, Ytr, Xte, Yte)
+# X_train, y_train, X_val, y_val, X_dev, y_dev, X_test, y_test = data
+
+# print(X_train.shape, X_val.shape, X_dev.shape, X_test.shape)
